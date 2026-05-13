@@ -1,27 +1,22 @@
-import { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useState, useCallback } from 'react';
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
   StyleSheet,
-  KeyboardAvoidingView,
-  Platform
+  FlatList
 } from 'react-native';
 
-import db from '../database/database';
+import { useFocusEffect } from '@react-navigation/native';
 
-export default function MedicationScreen() {
+import db from '../../database/database';
 
-  const [nome, setNome] = useState('');
-  const [dosagem, setDosagem] = useState('');
-  const [horario, setHorario] = useState('');
+function HomeScreen() {
 
   const [medications, setMedications] = useState([]);
 
   //////////////////////////////////////////////////////
-  // LISTAR
+  // CARREGAR DADOS
   //////////////////////////////////////////////////////
 
   async function loadMedications() {
@@ -42,95 +37,27 @@ export default function MedicationScreen() {
   }
 
   //////////////////////////////////////////////////////
-  // ADICIONAR
+  // SEMPRE QUE A TELA ABRIR OU VOLTAR
   //////////////////////////////////////////////////////
 
-  async function addMedication() {
-
-    if (!nome || !dosagem || !horario) {
-      alert('Preencha todos os campos');
-      return;
-    }
-
-    try {
-
-      await db.runAsync(
-        `INSERT INTO medications
-        (nome, dosagem, horario)
-        VALUES (?, ?, ?)`,
-        [nome, dosagem, horario]
-      );
-
-      setNome('');
-      setDosagem('');
-      setHorario('');
+  useFocusEffect(
+    useCallback(() => {
 
       loadMedications();
 
-    } catch (error) {
-
-      console.log(error);
-
-    }
-  }
-
-  useEffect(() => {
-    loadMedications();
-  }, []);
+    }, [])
+  );
 
   //////////////////////////////////////////////////////
-  // UI
+  // VIEW
   //////////////////////////////////////////////////////
 
   return (
 
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
-    >
+    <View style={styles.container}>
 
       <Text style={styles.title}>
-        💊 Medicamentos
-      </Text>
-
-      {/* FORMULÁRIO */}
-      <View style={styles.form}>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Nome do medicamento"
-          value={nome}
-          onChangeText={setNome}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Dosagem (ex: 500mg)"
-          value={dosagem}
-          onChangeText={setDosagem}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Horário (ex: 08:00)"
-          value={horario}
-          onChangeText={setHorario}
-        />
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={addMedication}
-        >
-          <Text style={styles.buttonText}>
-            Salvar medicamento
-          </Text>
-        </TouchableOpacity>
-
-      </View>
-
-      {/* LISTA */}
-      <Text style={styles.subtitle}>
-        Lista de medicamentos
+        Meus Medicamentos
       </Text>
 
       <FlatList
@@ -158,7 +85,7 @@ export default function MedicationScreen() {
         )}
       />
 
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -244,3 +171,5 @@ const styles = StyleSheet.create({
   }
 
 });
+
+export default HomeScreen;
